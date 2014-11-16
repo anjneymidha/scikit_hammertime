@@ -198,6 +198,7 @@ class Preprocess(object):
 		"""
 		print '-----> Saving drug_names to %s' % path
 		self.drug_names = list(set(self.drug_names))
+		self.drug_names.pop(0)
 		pickle.dump(self.drug_names, open(path, 'w'))
 
 

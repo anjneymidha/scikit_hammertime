@@ -143,19 +143,19 @@ if __name__ == '__main__':
 	data.DRUG = data.DRUG.apply(lambda l: [x for x in l if x in legal_DRUG])
 	data.REAC = data.REAC.apply(lambda l: [x for x in l if x in legal_REAC])
 
-	#=====[ Step 3: get positives	]=====
+	#=====[ Step 4: get positives	]=====
 	print '-----> Getting X, y positive'
 	DRUGs_pos, REACs_pos = get_X_y_positive(data)
 
-	#=====[ Step 4: get coocurrences	]=====
+	#=====[ Step 5: get coocurrences	]=====
 	print '-----> Getting coocurrences'
 	co_occurrences = get_co_occurrences(data)
 
-	#=====[ Step 5: get negative reactions	]=====
+	#=====[ Step 6: get negative reactions	]=====
 	print '-----> Getting X, y negative'
 	DRUGs_neg, REACs_neg = get_X_y_negative(data, co_occurrences)
 
-
+	#=====[ Step 7: save to disk	]=====
 	print '-----> Saving to pickle'
 	DRUGs = DRUGs_pos + DRUGs_neg 
 	REACs = REACs_pos + REACs_neg
