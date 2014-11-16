@@ -194,6 +194,11 @@ module.exports = function (grunt) {
           generatedImagesDir: '<%= yeoman.dist %>/images/generated'
         }
       },
+      devDist: {
+        options: {
+          cssDir: '<%= yeoman.dist %>/styles'  
+        }
+      },
       server: {
         options: {
           debugInfo: true
@@ -353,6 +358,17 @@ module.exports = function (grunt) {
           cwd: '.',
           src: 'bower_components/bootstrap-sass-official/assets/fonts/bootstrap/*',
           dest: '<%= yeoman.dist %>'
+        }]
+      },
+      devDist: {         
+        files: [{
+          expand: true,
+          dot: true,
+          cwd: '<%= yeoman.app %>',
+          dest: '<%= yeoman.dist %>',
+          src: [
+            '**','!styles/**'   // everything but styles/
+          ]
         }]
       },
       styles: {
