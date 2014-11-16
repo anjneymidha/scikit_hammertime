@@ -18,6 +18,7 @@ import numpy as np
 import os
 import w2v
 import pandas as pd
+from util import *
 from sklearn import cross_validation
 from sklearn.linear_model import LogisticRegression
 import pickle as pkl
@@ -37,7 +38,7 @@ class Predictor(object):
             data_dir: location of parameters 
         """
         self.data_dir = data_dir
-   #     self.load_data()
+        self.data = load_data()
 
 
 
@@ -158,10 +159,32 @@ class Predictor(object):
 
 
     def get_drugs(self):
-        pass
+        drugs = set()
+        for l in self.data.DRUG:
+            if type(l) == list:
+                for term in l:
+                    drugs.add(term)
+
+        return list(drugs)
 
     def get_conditions(self):
-        pass
+        conditions = set()
+        for l in self.data.INDI:
+            if type(l) == list:
+                for term in l:
+                    conditions.add(term)
+
+        return list(conditions)
+
+
+    def get_reactions(self):
+        reactions = set()
+        for l in self.data.REAC:
+            if type(l) == list:
+                for term in l:
+                    reactions.add(term)
+
+        return list(reactions)
 
     def query(self, drugs, condition):
        pass 
