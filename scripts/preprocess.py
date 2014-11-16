@@ -29,6 +29,7 @@ Fall 2014
 import os
 import pickle
 import pandas as pd
+from scikit_hammertime import *
 
 
 
@@ -76,7 +77,8 @@ def format_DRUG(df):
 
 	#=====[ Map drugnames to ids	]=====
 	db = DB()
-	df = df.apply(lambda x: list(set([db.query(y) for y in x if not db.query is None])))
+	df = df.apply(lambda x: list(set([db.query(str(y)) for y in x])))
+	df = df.apply(lambda x: [y for y in x if not y is None])
 	return df
 
 
@@ -135,13 +137,24 @@ def format_quarter(quarter_dir):
 	return joined
 
 
-def join_dfs(input_dir='/data/aers/entries', output_dir='/data/aers/formatted'):
-	data_dir = input_dir
 
+
+
+
+
+
+
+
+
+if __name__ == '__main__':
+
+	#=====[ Step 1: presets	]=====
+	data_dir = '/data/aers/entries'
+	output_dir = '/data/aers/formatted'
 	process_years = [2013, 2014]
 	process_quarters = [1, 2, 3, 4]
 
-	#=====[ Step 1: For each quarter... ]=====
+	#=====[ Step 2: For each quarter... ]=====
 	dfs = []
 	quarter_dirs = [os.path.join(data_dir, p) for p in os.listdir(data_dir)]
 	for quarter_dir in quarter_dirs:
@@ -159,16 +172,5 @@ def join_dfs(input_dir='/data/aers/entries', output_dir='/data/aers/formatted'):
 			
 			dfs.append(df)
 
-	return dfs
 
-
-
-
-
-
-
-
-
-if __name__ == '__main__':
-	dfs = join_dfs()
 
