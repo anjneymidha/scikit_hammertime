@@ -208,6 +208,7 @@ if __name__ == '__main__':
 
 	p = Preprocess()
 	p.preprocess()
+	p.save_drugnames()
 
 
 

@@ -40,6 +40,7 @@ class Predictor(object):
         """
         self.data_dir = data_dir
         self.data = load_data()
+        self.drug_names = load_drug_names()
 
 
 
@@ -47,22 +48,6 @@ class Predictor(object):
     ################################################################################
     ####################[ INTERNALS  ]##############################################
     ################################################################################
-
-    def load_data(self, num_dfs=1):
-        """
-            loads data to train 
-        """
-        print '-----> Loading dataframes (%d dataframes)' % num_dfs
-        dfs = []
-        df_paths = [os.path.join(self.data_dir, p) for p in os.listdir(self.data_dir) if p.endswith('.df')]
-        for p in df_paths[:num_dfs]:
-            df = pkl.load(open(p, 'r'))
-            dfs.append(pkl.load(open(p, 'r')))
-        self.data = pd.concat(dfs, axis=0)
-
-        print '-----> Loading drugnames (%d)' % '/data/aers/formatted/drug_names.pkl'
-        self.drug_names = pickle.load(open('/data/aers/formatted/drug_names.pkl', 'r'))
-
 
     def load_training_examples(self):
         self.training_tuples = pkl.load(open('/data/aers/training/DRUGs.pkl'))
