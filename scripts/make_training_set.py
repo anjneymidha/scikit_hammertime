@@ -61,6 +61,7 @@ def get_legal_reacs(df, topn=100):
 	for ix,row in df.iterrows():
 		occurrences += row
 
+
 def get_X_y_positive(df):
 	"""
 		given a dataframe, gathers all pairs that occur together 
