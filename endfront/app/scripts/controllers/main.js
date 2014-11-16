@@ -19,7 +19,7 @@ angular.module('interactionsApp')
     var medicinalProductsCanceler = $q.defer();
     $scope.$watch('medicalProductsPrefix',function(medicalProductsPrefix){
       console.log('medicalProductsPrefix',medicalProductsPrefix);
-      if(!medicalProductsPrefix){ 
+      if(!medicalProductsPrefix || medicalProductsPrefix.length < 4 ){ 
         return;
       }
 
@@ -57,7 +57,7 @@ angular.module('interactionsApp')
     var conditionsCanceler = $q.defer();
 
     $scope.$watch('conditionsPrefix',function(conditionsPrefix){
-      if(!conditionsPrefix){
+      if(!conditionsPrefix || conditionsPrefix.length < 4 ){
         return;
       }
 
