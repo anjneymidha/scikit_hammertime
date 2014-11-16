@@ -1,6 +1,6 @@
 ## <h1>React: Drug Safety in Your Pocket</h1>
 
-![React](/http://i.imgur.com/LVCxUoM.png)
+![React](http://i.imgur.com/LVCxUoM.png)<br>
 **Team: scikit_hammertime**<br>
 ==================================<br>
 Jake Beard: jake at minnow dot io <br>
