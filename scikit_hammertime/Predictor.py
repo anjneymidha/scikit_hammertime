@@ -36,15 +36,23 @@ class Predictor(object):
     clf_filename = 'clf.pkl'
 
 
-    def __init__(self, data_dir='/data/aers/production/'):
+    def __init__(self, data_dir='/data/aers/production/', ml_mode=False):
         """
             data_dir: location of parameters 
         """
+        print '=====[ CONSTRUCTING PREDICTOR ]====='
+
         self.data_dir = data_dir
 
-        print '=====[ CONSTRUCTING PREDICTOR ]====='
-        self.drug_names = load_drug_names()
-        self.drug_df = self.load_drug_dataframe()
+        if not ml_mode:
+            print '-----> Loading drugnames'
+            self.drug_names = load_drug_names(verbose=False)
+            print '-----> Loading drug dataframe'
+            self.load_drug_dataframe()
+
+        else:
+            self.load_data()
+
         print '=====[ CONSTRUCTION COMPLETE ]====='
 
 
