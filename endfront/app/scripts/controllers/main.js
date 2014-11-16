@@ -89,7 +89,9 @@ angular.module('interactionsApp')
     $scope.interactions = [];
     //$scope.$watchCollection('[medicalProductsPrefix,conditionsPrefix]',refreshInteraction);
     function refreshInteraction(){
-      if(!$scope.medicalProducts.length || !$scope.conditions.length){
+      if($scope.medicalProducts.length && 
+            $scope.medicalProducts.length >= 2 &&
+            $scope.conditions.length){
         $scope.interactions = [];
         return;
       }
