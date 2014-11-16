@@ -69,7 +69,7 @@ def parse_quarter_dir(quarter_dir):
 
 
 	#=====[ Step 2: load all files	]=====
-	grab_files = ['DRUG', 'INDI']
+	grab_files = ['DRUG', 'INDI', 'REAC']
 	dfs = {}	
 	data_paths = [os.path.join(ascii_dir, p) for p in os.listdir(ascii_dir) if p.lower().endswith('.txt') and p[:4] in grab_files]
 	for p in data_paths:
@@ -98,12 +98,17 @@ def retain_columns(df, col_list):
 	df = df.drop(drop_columns, axis=1, inplace=True)
 
 
-def format_DEMO(df):
-	"""
-		returns DEMO with only included columns 
-	"""
-	lowercase_column_names(df)
-	retain_columns([''])
+def format_DRUG(df):
+	retain_columns(df, ['primaryid', 'drugname'])
+	df.drugname = df.drugname.str.lower().str.strip().astype('category')
+
+
+def format_REAC(df):
+	retain_columns(df, ['primaryid', 'pt'])
+
+def format_INDI(df):
+	pass
+
 
 
 
@@ -112,8 +117,8 @@ def preprocess(input_dir='/data/aers/entries'):
 
 	data_dir = input_dir
 
-
 	process_years = [2013, 2014]
+
 	#=====[ Step 1: For each quarter... ]=====
 	dfs = []
 	quarter_dirs = [os.path.join(data_dir, p) for p in os.listdir(data_dir)]
