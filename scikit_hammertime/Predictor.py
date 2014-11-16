@@ -41,9 +41,9 @@ class Predictor(object):
         self.data_dir = data_dir
 
         print '=====[ CONSTRUCTING PREDICTOR ]====='
-        self.load_training_examples()
+        # self.load_training_examples()
         self.drug_names = load_drug_names()
-        self.clf = self.load_clf()
+        # self.clf = self.load_clf()
         print '=====[ CONSTRUCTION COMPLETE ]====='
 
 
