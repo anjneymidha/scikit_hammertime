@@ -99,7 +99,7 @@ def preprocess(input_dir, output):
 	data_dir = input_dir
 
 	#=====[ Step 1: For each quarter... ]=====
-	quarter_dir = [os.path.join(data_dir, p) for p in os.listdir(input_dir)]
+	quarter_dirs = [os.path.join(data_dir, p) for p in os.listdir(input_dir)]
 	for quarter_dir in quarter_dirs:
 
 		#=====[ Step 2: parse 	]=====
