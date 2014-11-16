@@ -39,7 +39,7 @@ angular.module('interactionsApp')
     });
 
     $scope.addMedicalProduct = function(product){
-      $scope.showConditions = true;
+      $scope.showConditions = $scope.showConditions || $scope.medicalProducts.length >= 2;
       $scope.medicalProductsPrefix = '';
       $scope.medicalProductsBuffer = [];
       $scope.medicalProducts.push(product);
@@ -93,6 +93,8 @@ angular.module('interactionsApp')
             $scope.medicalProducts.length < 2 ||
             !$scope.conditions.length){
         $scope.interactions = [];
+        $scope.interactionScore = null;
+        $scope.showNoResultsFound = false;
         return;
       }
 
@@ -101,7 +103,15 @@ angular.module('interactionsApp')
                       $scope.medicalProducts.join(',') + '&' +
                     'preexistingconditions=' + 
                     $scope.conditions.join(',')).then(function(response){
-        $scope.interactions  = response.data.results;
+        
+        if(!response.data.results || response.data.results.length !== 2){
+          alert('Unexpected result from server');
+          return;
+        }
+        $scope.interactionScore = response.data.results[0].filter(function(o){return o.AE === 'Interaction'})[0].score;
+        $scope.formattedInteractionScore = Math.round($scope.interactionScore * 100);
+        $scope.showNoResultsFound = response.data.results[1].length === 0;
+        $scope.interactions = response.data.results[1];
       },function(response){
         //TODO: bootstrap alert dialog
         alert('error fetching response');

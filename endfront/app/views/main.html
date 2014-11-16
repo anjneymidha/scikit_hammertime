@@ -43,11 +43,20 @@
     <div class="col-md-4">
       <div id="interactions" class="box animate-show" ng-show="showInteractions">
         <h2>Interactions</h2>
-        <ul>
+        <p ng-show="interactionScore && interactionScore < 0.5" class="animate-show">
+          Less than 50% chance of interaction.
+        </p>
+        <p ng-show="interactionScore && interactionScore >= 0.5" class="animate-show">
+          {{formattedInteractionScore}}% chance of interaction.
+        </p>
+        <ul ng-show="!showNoResultsFound" >
           <li ng-repeat="interaction in interactions" class="animate-repeat">
-            {{interaction.AE}} <!-- ({{interaction.score}}) -->
+            {{interaction}}
           </li>
         </ul>
+        <p ng-show="showNoResultsFound" class="animate-show">
+          No interactions found.
+        </p>
       </div>
     </div>
   </div>
