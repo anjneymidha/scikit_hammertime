@@ -42,9 +42,7 @@ class Predictor(object):
         self.data_dir = data_dir
 
         print '=====[ CONSTRUCTING PREDICTOR ]====='
-        # self.load_training_examples()
         self.drug_names = load_drug_names()
-        # self.clf = self.load_clf()
         print '=====[ CONSTRUCTION COMPLETE ]====='
 
 
@@ -173,7 +171,7 @@ class Predictor(object):
 
         #=====[ Step 1: train word2vec ]=====
         print '-----> Training drug2vec'
-        self.drug2vec = gensim.models.word2vec.Word2Vec(df.DRUG, size=ndim, min_count=min_count, sg=0).train()
+        self.drug2vec = gensim.models.word2vec.Word2Vec(self.training_tuples, size=ndim, min_count=min_count, sg=0).train()
 
         #=====[ Step 3: make X and y ]=====
         print '-----> Making X, y'
