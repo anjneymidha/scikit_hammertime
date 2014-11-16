@@ -18,3 +18,13 @@ Bayes Impact Hackathon 2014<br>
 
 **Solution:**<br>
 - We use a distributed representation of the AERS ( Federal Drug Adverse Event Reporting System) dataset classified by the RxNorm hierarchy, using neural networks to predict novel interactions for pairs of drugs that do not have a historical interaction record
+
+==================================<br>
+**acknowledgements:**<br>
+
+**Libraries used:**<br>
+- Word2vec (https://code.google.com/p/word2vec/)
+
+**Papers Referenced:**<br>
+- http://www.tatonetti.com/papers/CPT_2011_Tatonetti.pdf
+- http://jamia.bmj.com/content/early/2013/02/05/amiajnl-2012-001482
