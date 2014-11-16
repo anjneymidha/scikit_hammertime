@@ -14,10 +14,12 @@ jhack@stanford.edu
 Fall 2014
 ##################
 """
+import numpy as np
 import os
 import w2v
-import sklearn
 import pandas as pd
+from sklearn import cross_validation
+from sklearn.linear_model import LogisticRegression
 import pickle as pkl
 
 class Predictor(object):
@@ -35,7 +37,7 @@ class Predictor(object):
             data_dir: location of parameters 
         """
         self.data_dir = data_dir
-        self.load_data()
+   #     self.load_data()
 
 
 
@@ -57,8 +59,8 @@ class Predictor(object):
         self.data = pd.concat(dfs, axis=0)
 
     def load_training_examples(self):
-        self.training_tuples = pkl.load(open('/data/aers/training/DRUGs.data'))
-        self.training_reacs = pkl.load(open('/data/aers/training/REACs.data'))
+        self.training_tuples = pkl.load(open('/data/aers/training/DRUGs.pkl'))
+        self.training_reacs = pkl.load(open('/data/aers/training/REACs.pkl'))
 
 
     def load_clf(self, name='classifier.pkl'):
@@ -97,8 +99,11 @@ class Predictor(object):
         y = []
         for i in range(len(self.training_tuples)):
             training_tuple = self.training_tuples[i]
-            X.append(feature_engineer(drug2vec[training_tuple[0]],drug2vec[training_tuple[1]]))
-            y.append(len(self.training_reacs[i]) > 0)
+            try:
+                X.append(self.feature_engineer(drug2vec[training_tuple[0]],drug2vec[training_tuple[1]]))
+                y.append(len(self.training_reacs[i]) > 0)
+            except:
+                continue
         X = np.array(X)
         y = np.array(y)
         return X,y
@@ -109,7 +114,30 @@ class Predictor(object):
         """
         outer_product = np.dot(vec1,vec2.T)
         diff = vec1 - vec2
+        add = vec1 + vec2
+        return np.hstack([diff,add])
 
+    def cross_validate(self):
+        # get X,y dataset
+        X,y = self.train()
+        # randomly permute it
+        X,y = self.shuffle_in_unison(X,y)
+        # instantiate the logistic regression
+        LR = LogisticRegression()
+        # get CV scores
+        scores = cross_validation.cross_val_score(LR,X,y)
+        return scores
+
+
+    def shuffle_in_unison(self, a, b):
+        assert len(a) == len(b)
+        shuffled_a = np.empty(a.shape, dtype=a.dtype)
+        shuffled_b = np.empty(b.shape, dtype=b.dtype)
+        permutation = np.random.permutation(len(a))
+        for old_index, new_index in enumerate(permutation):
+            shuffled_a[new_index] = a[old_index]
+            shuffled_b[new_index] = b[old_index]
+        return shuffled_a, shuffled_b
 
 
 
@@ -140,13 +168,4 @@ class Predictor(object):
 
     def to_numpy_array(self, drugs, condition):
        pass 
-
-    def train(self):
-        # make onehot:
-
-        # turn into numpy format
-    
-        # create naive bayes
-        NB = sklearn.naive_bayes.BernoulliNB()
-        NB.fit(X,y)
 
