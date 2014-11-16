@@ -3,7 +3,7 @@ app = Flask(__name__)
 
 from pytrie import StringTrie
 
-from scikit_hammertime.predictor import Predictor
+from scikit_hammertime.Predictor import Predictor
 
 
 

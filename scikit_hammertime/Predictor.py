@@ -18,6 +18,7 @@ import numpy as np
 import os
 import w2v
 import pandas as pd
+import util
 from util import *
 from sklearn import cross_validation
 from sklearn.linear_model import LogisticRegression
@@ -51,10 +52,14 @@ class Predictor(object):
     ####################[ LOADING/SAVING ]##########################################
     ################################################################################
 
+    def load_drug_dataframe(self):  
+        self.drug_df = util.load_data(verbose=False)
+
+
     def load_training_examples(self):
-        print '-----> Loading training examples'
         self.training_tuples = pkl.load(open('/data/aers/training/DRUGs.pkl'))
         self.training_reacs = pkl.load(open('/data/aers/training/REACs.pkl'))
+
 
 
     # def load_clf(self, name='classifier.pkl'):
@@ -167,11 +172,15 @@ class Predictor(object):
         print '=====[ GATHER PRODUCTION DATA: BEGIN ]====='
 
         #=====[ Step 0: load training examples ]=====
+        print '-----> Loading training examples'
         self.load_training_examples()
+
+        print '-----> Loading drug_df'
+        self.data = self.load_drug_dataframe()
 
         #=====[ Step 1: train word2vec ]=====
         print '-----> Training drug2vec'
-        self.drug2vec = gensim.models.word2vec.Word2Vec(self.training_tuples, size=ndim, min_count=min_count, sg=0)
+        self.drug2vec = gensim.models.word2vec.Word2Vec(self.drug_df.DRUG, size=ndim, min_count=min_count, sg=0)
 
         #=====[ Step 3: make X and y ]=====
         print '-----> Making X, y'
