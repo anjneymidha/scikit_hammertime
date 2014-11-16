@@ -18,6 +18,7 @@ import numpy as np
 import os
 import w2v
 import pandas as pd
+import util
 from util import *
 from sklearn import cross_validation
 from sklearn.linear_model import LogisticRegression
