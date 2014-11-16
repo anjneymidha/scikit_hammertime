@@ -175,7 +175,7 @@ class Predictor(object):
         self.load_training_examples()
 
         print '-----> Loading drug_df'
-        self.data = self.load_dataframes()
+        self.data = self.load_drug_dataframe()
 
         #=====[ Step 1: train word2vec ]=====
         print '-----> Training drug2vec'
