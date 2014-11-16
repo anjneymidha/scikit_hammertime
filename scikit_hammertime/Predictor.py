@@ -289,7 +289,9 @@ class Predictor(object):
         #=====[ Lookup table ]=====
         drug_tuple = tuple(sorted([d1,d2]))
         if drug_tuple in self.lookup_table:
-            return predictions, self.lookup_table[drug_tuple]
+            c = Counter(self.lookup_table[drug_tuple])
+            new_list = [y[0] for y in sorted([(x,c[x]) for x in c], key=lambda x:x[1])[::-1]]
+            return predictions, new_list[:4]
 
         #====[ Similarity lookup ]====
         d1_most_sim = self.drug2vec.most_similar(positive=[d1], topn=2)
@@ -301,8 +303,9 @@ class Predictor(object):
             for drug_two in d2_set:
                 drug_tuple = tuple(sorted([drug_one, drug_two]))
                 interactions += self.lookup_table[drug_tuple]
-        return predictions, interactions
-            for drug_two
+        c = Counter(interactions)
+        new_list = [y[0] for y in sorted([(x,c[x]) for x in c], key=lambda x:x[1])[::-1]
+        return predictions,new_list[4]
 
 
 
