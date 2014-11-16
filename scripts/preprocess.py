@@ -99,8 +99,8 @@ class Preprocess(object):
 
 		#=====[ add drug_names	]=====
 		print '	---> updating drug_names'
-		for ix, row in df.iterrows():
-			self.drug_names += row
+		for x in df:
+			self.drug_names += x
 
 		#=====[ Map drugnames to ids	]=====
 		df = df.apply(lambda x: list(set([self.db.query(str(y)) for y in x])))
@@ -122,7 +122,7 @@ class Preprocess(object):
 		return df
 
 
-	def format_quarter(self, quarter_dir, drug_names):
+	def format_quarter(self, quarter_dir):
 		"""
 			given a path to a directory containing data files, 
 			(i.e. data/faers_ascii_2014q1)
@@ -173,7 +173,7 @@ class Preprocess(object):
 		quarter_dirs = [os.path.join(self.input_dir, p) for p in os.listdir(self.input_dir)]
 		for quarter_dir in quarter_dirs:
 
-			year, quarter = parse_quarter_dirname(quarter_dir)
+			year, quarter = self.parse_quarter_dirname(quarter_dir)
 			if year in self.process_years and quarter in self.process_quarters:
 
 				dump_path_pickle = os.path.join(self.output_dir, str(year) + 'q' + str(quarter) + '.df')
@@ -191,6 +191,14 @@ class Preprocess(object):
 
 
 
+
+	def save_drugnames(self, path='/data/aers/formatted/drug_names.pkl'):
+		"""
+			saves drugnames (a list) to prespecified path 
+		"""
+		print '-----> Saving drug_names to %s' % path
+		self.drug_names = list(set(self.drug_names))
+		pickle.dump(self.drug_names, open(path, 'w'))
 
 
 

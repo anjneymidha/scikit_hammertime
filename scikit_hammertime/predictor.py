@@ -23,6 +23,7 @@ from sklearn import cross_validation
 from sklearn.linear_model import LogisticRegression
 import pickle as pkl
 
+
 class Predictor(object):
     """
         Class: Predictor 
@@ -51,13 +52,17 @@ class Predictor(object):
         """
             loads data to train 
         """
-        print '-----> Loading data (%d dataframes)' % num_dfs
+        print '-----> Loading dataframes (%d dataframes)' % num_dfs
         dfs = []
         df_paths = [os.path.join(self.data_dir, p) for p in os.listdir(self.data_dir) if p.endswith('.df')]
         for p in df_paths[:num_dfs]:
             df = pkl.load(open(p, 'r'))
             dfs.append(pkl.load(open(p, 'r')))
         self.data = pd.concat(dfs, axis=0)
+
+        print '-----> Loading drugnames (%d)' % '/data/aers/formatted/drug_names.pkl'
+        self.drug_names = pickle.load(open('/data/aers/formatted/drug_names.pkl', 'r'))
+
 
     def load_training_examples(self):
         self.training_tuples = pkl.load(open('/data/aers/training/DRUGs.pkl'))
@@ -159,13 +164,8 @@ class Predictor(object):
 
 
     def get_drugs(self):
-        drugs = set()
-        for l in self.data.DRUG:
-            if type(l) == list:
-                for term in l:
-                    drugs.add(term)
+        return self.drug_names
 
-        return list(drugs)
 
     def get_conditions(self):
         conditions = set()
