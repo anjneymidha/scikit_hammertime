@@ -58,29 +58,28 @@ class Predictor(object):
         self.training_reacs = pkl.load(open('/data/aers/training/REACs.pkl'))
 
 
-    def load_clf(self, name='classifier.pkl'):
-        """
-            loads the classifier 
-        """
-        print '-----> Loading clf'
-        clf_path = os.path.join(self.data_dir, name)
-        if os.path.exists(clf_path):
-            clf = pkl.load(open(clf_path))
-        else:
-            clf = None
-        return clf
+    # def load_clf(self, name='classifier.pkl'):
+    #     """
+    #         loads the classifier 
+    #     """
+    #     print '-----> Loading clf'
+    #     clf_path = os.path.join(self.data_dir, name)
+    #     if os.path.exists(clf_path):
+    #         clf = pkl.load(open(clf_path))
+    #     else:
+    #         clf = None
+    #     return clf
 
 
-    def save_clf(self, name='classifier.pkl'):
-        """
-            saves the classifier to disk 
-        """
-        print '-----> Saving clf'
-        clf_path = os.path.join(self.data_dir, name)
-        pkl.dump(self.clf, open(clf_path, 'w'))
+    # def save_clf(self, name='classifier.pkl'):
+    #     """
+    #         saves the classifier to disk 
+    #     """
+    #     print '-----> Saving clf'
+    #     clf_path = os.path.join(self.data_dir, name)
+    #     pkl.dump(self.clf, open(clf_path, 'w'))
 
 
-    
 
     def load_data(self, name='classifier.pkl'):
         """
@@ -89,8 +88,13 @@ class Predictor(object):
         """
         print '=====[ LOADING DATA ]====='
         print '-----> Loading: drug2vec'
-        
+        self.drug2vec = pickle.load(open(os.path.join(self.data_dir, 'drug2vec.pkl'), 'r'))
 
+        print '-----> Loading: X, y'
+        self.X = pickle.load(open(os.path.join(self.data_dir, 'X.pkl'), 'r'))
+        self.y = pickle.load(open(os.path.join(self.data_dir, 'y.pkl'), 'r'))
+
+        print '=====[ LOADING DATA: COMPLETE ]====='
 
 
 
@@ -99,17 +103,30 @@ class Predictor(object):
             saves:
                 X, y, drug2vec, clf
         """
-        pickle.load()
+        print '=====[ SAVING DATA ]====='
+
+        print '-----> Saving drug2vec'
+        pickle.dump(self.drug2vec, open(os.path.join(self.data_dir, 'drug2vec.pkl'), 'w'))
+
+        print '-----> Saving X, y'
+        pickle.dump(self.X, open(os.path.join(self.data_dir, 'X.pkl'), 'w'))
+        pickle.dump(self.y, open(os.path.join(self.data_dir, 'y.pkl'), 'w'))
+
+        print '=====[ SAVING DATA: COMPLETE ]====='
 
 
     ################################################################################
     ####################[ TRAINING  ]###############################################
     ################################################################################
 
-    def featurize(self, vec1, vec2):
+    def featurize(self, drug1, drug2):
         """
             returns a numpy feature array for the two drugs vec1 and vec2
         """
+        #=====[ Step 1: get drug vectors ]=====
+        vec1, vec2 = self.drug2vec[drug1], self.drug2vec[drug2]
+
+        #=====[ Step 2: combos of them ]=====
         # outer_product = np.dot(vec1,vec2.T)
         diff = vec1 - vec2
         add = vec1 + vec2
@@ -148,14 +165,14 @@ class Predictor(object):
         """
             gets X, y, drug2vec; saves them in /data/aers/production
         """
-        #=====[ Step 1: train word2vec ]=====
         print '=====[ GATHER PRODUCTION DATA: BEGIN ]====='
+
+        #=====[ Step 0: load training examples ]=====
+        self.load_training_examples()
+
+        #=====[ Step 1: train word2vec ]=====
         print '-----> Training drug2vec'
         self.drug2vec = gensim.models.word2vec.Word2Vec(df.DRUG, size=ndim, min_count=min_count, sg=0).train()
-
-        #=====[ Step 2: save word2vec ]=====
-        print '-----> Saving drug2vec'
-        pickle.dump(self.drug2vec, open(os.path.join(self.data_dir, 'drug2vec.pkl'), 'w'))
 
         #=====[ Step 3: make X and y ]=====
         print '-----> Making X, y'
@@ -164,11 +181,6 @@ class Predictor(object):
         #=====[ Step 4: shuffle X, y ]=====
         print '-----> Shuffling X, y'
         self.X, self.y = self.shuffle_in_unison(self.X, self.y)
-
-        #=====[ Step 5: save X, y  ]=====
-        print '-----> Saving X, y (data_dir/X.pkl, data_dir/y.pkl)'
-        pickle.dump(self.X, open(os.path.join(self.data_dir, 'X.pkl'), 'w'))
-        pickle.dump(self.y, open(os.path.join(self.data_dir, 'y.pkl'), 'w'))
 
         print '=====[ GATHER PRODUCTION DATA: COMPLETE ]====='
 
@@ -182,6 +194,7 @@ class Predictor(object):
             self.gather_production_data()
 
         #=====[ Step ]=====
+        raise NotImplementedError
 
 
 
