@@ -43,7 +43,7 @@ def parse_quarter_dirname(quarter_dir):
 
 def parse_filename(filepath):
 	"""
-		given a filename, returns 
+		given a .txt filename, returns 
 			file_descriptor, year, quarter
 	"""
 	filename = os.path.split(filepath)[-1]
@@ -51,13 +51,6 @@ def parse_filename(filepath):
 	year = int(filename[4:6])
 	quarter = int(filename[7])
 	return file_descriptor, year, quarter
-
-
-def parse_drug_ind_ther(df):
-	"""
-		does groupby to put all drugs in same row 
-	"""
-	df.groupby()
 
 
 def parse_quarter_dir(quarter_dir):
@@ -72,11 +65,13 @@ def parse_quarter_dir(quarter_dir):
 	ascii_dir = os.path.join(quarter_dir, 'ascii')
 	if not os.path.exists(ascii_dir):
 		ascii_dir = os.path.join(quarter_dir, 'ASCII')
+	assert os.path.exists(ascii_dir)
+
 
 	#=====[ Step 2: load all files	]=====
+	grab_files = ['DRUG', 'INDI']
 	dfs = {}	
-	assert os.path.exists(ascii_dir)
-	data_paths = [os.path.join(ascii_dir, p) for p in os.listdir(ascii_dir) if p.lower().endswith('.txt')]
+	data_paths = [os.path.join(ascii_dir, p) for p in os.listdir(ascii_dir) if p.lower().endswith('.txt') and p[:4] in grab_files]
 	for p in data_paths:
 		file_descriptor, year, quarter = parse_filename(p)
 		print '	---> %s' % file_descriptor
@@ -90,24 +85,44 @@ def parse_quarter_dir(quarter_dir):
 
 
 
+################################################################################
+####################[ FORMAT INDIVIDUAL FILES	]###############################
+################################################################################
+
+def lowercase_column_names (df):
+	df.columns = [x.lower() for x in df.columns]
+
+
+def retain_columns(df, col_list):
+	drop_columns = set(df.columns).difference(set(col_list))
+	df = df.drop(drop_columns, axis=1, inplace=True)
+
+
+def format_DEMO(df):
+	"""
+		returns DEMO with only included columns 
+	"""
+	lowercase_column_names(df)
+	retain_columns([''])
 
 
 
 
-
-
-import click
-@click.command()
-@click.option('-i', '--input_dir', help='Input directory containing ascii files', default='/data/aers/entries')
-@click.option('-o', '--output', help='Input directory containing ascii files')
-def preprocess(input_dir, output):
+def preprocess(input_dir='/data/aers/entries'):
 
 	data_dir = input_dir
 
+
+	process_years = [2013, 2014]
 	#=====[ Step 1: For each quarter... ]=====
+	dfs = []
 	quarter_dirs = [os.path.join(data_dir, p) for p in os.listdir(data_dir)]
 	for quarter_dir in quarter_dirs:
-		dfs = parse_quarter_dir(quarter_dir)
+		year, quarter = parse_quarter_dirname(quarter_dir)
+		if year in process_years:
+			dfs.append(parse_quarter_dir(quarter_dir))
+
+	return dfs
 
 
 
