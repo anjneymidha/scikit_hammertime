@@ -1,4 +1,5 @@
 """
+
 Script: Predictor.py
 ====================
 
@@ -14,6 +15,7 @@ Fall 2014
 ##################
 """
 import os
+import w2v
 import sklearn
 import pandas as pd
 import pickle as pkl
@@ -54,6 +56,10 @@ class Predictor(object):
             dfs.append(pkl.load(open(p, 'r')))
         self.data = pd.concat(dfs, axis=0)
 
+    def load_training_examples(self):
+        self.training_tuples = pkl.load(open('/data/aers/training/DRUGs.data'))
+        self.training_reacs = pkl.load(open('/data/aers/training/REACs.data'))
+
 
     def load_clf(self, name='classifier.pkl'):
         """
@@ -80,9 +86,31 @@ class Predictor(object):
         """
             trains the classifier 
         """
-        if self.data is None:
-            self.load_data()
-        raise NotImplementedError
+       # if self.data is None:
+        #    self.load_data()
+        # load the word2vec trained module
+        drug2vec = w2v.train()
+        # load the training
+        self.load_training_examples()
+        # make the training X,Y numpy matrix
+        X = []
+        y = []
+        for i in range(len(self.training_tuples)):
+            training_tuple = self.training_tuples[i]
+            X.append(feature_engineer(drug2vec[training_tuple[0]],drug2vec[training_tuple[1]]))
+            y.append(len(self.training_reacs[i]) > 0)
+        X = np.array(X)
+        y = np.array(y)
+        return X,y
+
+    def feature_engineer(self, vec1, vec2):
+        """
+            returns a numpy feature array for the two drugs vec1 and vec2
+        """
+        outer_product = np.dot(vec1,vec2.T)
+        diff = vec1 - vec2
+
+
 
 
 
