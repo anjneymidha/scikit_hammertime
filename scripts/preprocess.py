@@ -131,7 +131,7 @@ def format_quarter(quarter_dir):
 	return joined
 
 
-def preprocess(input_dir='/data/aers/entries', output_dir='/data/aers/formatted'):
+def join_dfs(input_dir='/data/aers/entries', output_dir='/data/aers/formatted'):
 	data_dir = input_dir
 
 	process_years = [2013, 2014]
@@ -166,5 +166,5 @@ def preprocess(input_dir='/data/aers/entries', output_dir='/data/aers/formatted'
 
 
 if __name__ == '__main__':
-	dfs = preprocess()
+	dfs = join_dfs()
 

@@ -13,6 +13,7 @@ jhack@stanford.edu
 Fall 2014
 ##################
 """
+import os
 import sklearn
 import pandas as pd
 import pickle as pkl
@@ -24,34 +25,34 @@ class Predictor(object):
 
         Class wrapping ML predictor for drug interactions
     """
-    data_filename = 'data.df'
     clf_filename = 'clf.pkl'
 
 
-    def __init__(self, data_dir='/data/aers/'):
+    def __init__(self, data_dir='/data/aers/formatted/'):
         """
             data_dir: location of parameters 
         """
+        self.data_dir = data_dir
         self.load_data()
+
+
 
 
     ################################################################################
     ####################[ INTERNALS  ]##############################################
     ################################################################################
 
-    def load_data(self, name='traindata.df'):
+    def load_data(self, num_dfs=1):
         """
             loads data to train 
         """
-        print '-----> Loading data'
-        data_path = os.path.join(self.data_dir, name)
-        if os.path.exists(data_path):
-            self.data = pkl.load(open(data_path, 'r'))
-            if not type(data) == tuple and len(data) == 2:
-                raise Exception("Incorrectly formatted data")
-        else:
-            self.data = None
-
+        print '-----> Loading data (%d dataframes)' % num_dfs
+        dfs = []
+        df_paths = [os.path.join(self.data_dir, p) for p in os.listdir(self.data_dir) if p.endswith('.df')]
+        for p in df_paths[:num_dfs]:
+            df = pkl.load(open(p, 'r'))
+            dfs.append(pkl.load(open(p, 'r')))
+        self.data = pd.concat(dfs, axis=0)
 
 
     def load_clf(self, name='classifier.pkl'):
@@ -79,7 +80,9 @@ class Predictor(object):
         """
             trains the classifier 
         """
-        
+        if self.data is None:
+            self.load_data()
+        raise NotImplementedError
 
 
 
