@@ -159,15 +159,29 @@ class Predictor(object):
 
 
     def get_drugs(self):
-        pass
+        drugs = set()
+        for l in self.data.DRUG:
+            for term in l:
+                drugs.add(term)
+
+        return list(drugs)
 
     def get_conditions(self):
         conditions = set()
-        for l in self.data.REAC:
+        for l in self.data.INDI:
             for term in l:
                 conditions.add(term)
 
         return list(conditions)
+
+
+    def get_reactions(self):
+        reactions = set()
+        for l in self.data.REAC:
+            for term in l:
+                reactions.add(term)
+
+        return list(reactions)
 
     def query(self, drugs, condition):
        pass 
