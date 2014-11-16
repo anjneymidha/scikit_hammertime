@@ -276,10 +276,7 @@ class Predictor(object):
         if d1 is None or d2 is None:
             raise Exception("Something got fucked up: %s or %s not in db" % (s1, s2))
 
-        #=====[ Lookup table ]=====
-        key = tuple(sorted([d1, d2]))
-        if key in self.lookup_table:
-            return [{'score':0.69, 'AE':k} for k in self.lookup_table[key]]
+      
 
         #=====[ Predict ]=====
         features = self.featurize(d1, d2)
@@ -287,7 +284,25 @@ class Predictor(object):
                             {'AE':'Interaction', 'score':self.clf.predict_proba(features)[0][1]},
                             {'AE':'No interaction', 'score':self.clf.predict_proba(features)[0][0]}
                         ] 
-        return predictions
+    
+
+        #=====[ Lookup table ]=====
+        drug_tuple = tuple(sorted([d1,d2]))
+        if drug_tuple in self.lookup_table:
+            return predictions, self.lookup_table[drug_tuple]
+
+        #====[ Similarity lookup ]====
+        d1_most_sim = self.drug2vec.most_similar(positive=[d1], topn=2)
+        d2_most_sim = self.drug2vec.most_similar(positive=[d2], topn=2)
+        d1_set = [d1] + [x[0] for x in d1_most_sim]
+        d2_set = [d2] + [x[0] for x in d2_most_sim]
+        interactions = []
+        for drug_one in d1_set:
+            for drug_two in d2_set:
+                drug_tuple = tuple(sorted([drug_one, drug_two]))
+                interactions += self.lookup_table[drug_tuple]
+        return predictions, interactions
+            for drug_two
 
 
 
