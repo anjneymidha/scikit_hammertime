@@ -56,9 +56,8 @@ def interact():
 	meds = request.args.get('medicinalproducts')
 	cons = request.args.get('conditions')
 
-	print meds
-
-	returnlist = app.p.predict(meds)
+	marray = meds.split(',')
+	returnlist = app.p.predict(marray)
 
 
 	return jsonify(results=returnlist)
