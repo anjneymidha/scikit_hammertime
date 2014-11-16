@@ -15,12 +15,3 @@ class DB():
 		results = c.execute(q)
 		r=c.fetchone()
 		return r[0]
-
-
-
-
-
-from p import DB
-d = DB()
-
-d.query("modafinil")
