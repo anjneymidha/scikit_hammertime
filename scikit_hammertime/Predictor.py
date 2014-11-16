@@ -20,6 +20,7 @@ import w2v
 import pandas as pd
 import util
 from util import *
+from SQL import DB
 from sklearn import cross_validation
 from sklearn.linear_model import LogisticRegression
 import gensim
@@ -81,7 +82,7 @@ class Predictor(object):
         print '-----> Loading clf'
         clf_path = os.path.join(self.data_dir, name)
         if os.path.exists(clf_path):
-            clf = pkl.load(open(clf_path))
+            clf = pickle.load(open(clf_path))
         else:
             clf = None
         return clf
@@ -92,7 +93,7 @@ class Predictor(object):
             saves the classifier to disk 
         """
         clf_path = os.path.join(self.data_dir, name)
-        pkl.dump(self.clf, open(clf_path, 'w'))
+        pickle.dump(self.clf, open(clf_path, 'w'))
 
 
 
@@ -274,7 +275,8 @@ class Predictor(object):
 
         #=====[ Predict ]=====
         features = self.featurize(d1, d2)
-        return self.clf.predict(features)
+        predictions = [{'AE':'Interaction', 'score':self.clf.predict(features)}] 
+
 
 
 
