@@ -21,6 +21,7 @@ import pandas as pd
 from util import *
 from sklearn import cross_validation
 from sklearn.linear_model import LogisticRegression
+import gensim
 import pickle as pkl
 
 
