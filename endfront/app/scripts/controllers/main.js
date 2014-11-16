@@ -89,9 +89,9 @@ angular.module('interactionsApp')
     $scope.interactions = [];
     //$scope.$watchCollection('[medicalProductsPrefix,conditionsPrefix]',refreshInteraction);
     function refreshInteraction(){
-      if($scope.medicalProducts.length && 
-            $scope.medicalProducts.length >= 2 &&
-            $scope.conditions.length){
+      if(!$scope.medicalProducts.length ||
+            $scope.medicalProducts.length < 2 ||
+            !$scope.conditions.length){
         $scope.interactions = [];
         return;
       }
@@ -99,7 +99,7 @@ angular.module('interactionsApp')
       $http.get(hostname + '/interactions?' + 
                     'medicinalproducts=' + 
                       $scope.medicalProducts.join(',') + '&' +
-                    '/preexistingconditions=' + 
+                    'preexistingconditions=' + 
                     $scope.conditions.join(',')).then(function(response){
         $scope.interactions  = response.data.results;
       },function(response){
