@@ -11,12 +11,12 @@ from scikit_hammertime.Predictor import Predictor
 @app.before_first_request
 def init():
 
-	p = Predictor()
+	app.p = Predictor()
 	app.meditems = StringTrie()
-	drugs = p.get_drugs()
+	drugs = app.p.get_drugs()
 
 	app.conitems = StringTrie()
-	conditions = p.get_conditions()
+	conditions = app.p.get_conditions()
 
 	for d in drugs:
 		app.meditems[d] = d
@@ -56,9 +56,10 @@ def interact():
 	meds = request.args.get('medicinalproducts')
 	cons = request.args.get('conditions')
 
-	testlist = [{'se': 'headache', 'score': 4},{'se': 'headache', 'score': 4},{'se': 'headache', 'score': 4},{'se': 'headache', 'score' : 4}]
+	returnlist = app.p.predict(meds)
 
-	return jsonify(results=testlist)
+
+	return jsonify(results=returnlist)
 
 
 
