@@ -43,12 +43,15 @@ class Predictor(object):
         print '=====[ CONSTRUCTING PREDICTOR ]====='
 
         self.data_dir = data_dir
+        self.db = DB()
 
         if not ml_mode:
             print '-----> Loading drugnames'
             self.drug_names = load_drug_names(verbose=False)
             print '-----> Loading drug dataframe'
             self.load_drug_dataframe()
+            print '-----> Loading classifier'
+            self.load_clf()
 
         else:
             self.load_data()
@@ -71,26 +74,25 @@ class Predictor(object):
 
 
 
-    # def load_clf(self, name='classifier.pkl'):
-    #     """
-    #         loads the classifier 
-    #     """
-    #     print '-----> Loading clf'
-    #     clf_path = os.path.join(self.data_dir, name)
-    #     if os.path.exists(clf_path):
-    #         clf = pkl.load(open(clf_path))
-    #     else:
-    #         clf = None
-    #     return clf
+    def load_clf(self, name='classifier.pkl'):
+        """
+            loads the classifier 
+        """
+        print '-----> Loading clf'
+        clf_path = os.path.join(self.data_dir, name)
+        if os.path.exists(clf_path):
+            clf = pkl.load(open(clf_path))
+        else:
+            clf = None
+        return clf
 
 
-    # def save_clf(self, name='classifier.pkl'):
-    #     """
-    #         saves the classifier to disk 
-    #     """
-    #     print '-----> Saving clf'
-    #     clf_path = os.path.join(self.data_dir, name)
-    #     pkl.dump(self.clf, open(clf_path, 'w'))
+    def save_clf(self, name='classifier.pkl'):
+        """
+            saves the classifier to disk 
+        """
+        clf_path = os.path.join(self.data_dir, name)
+        pkl.dump(self.clf, open(clf_path, 'w'))
 
 
 
@@ -199,6 +201,18 @@ class Predictor(object):
         print '=====[ GATHER PRODUCTION DATA: COMPLETE ]====='
 
 
+    def train(self):
+        """
+            trains and saves the classifier 
+            (call gather_production_data first)
+        """
+        self.clf = LogisticRegression()
+        print '-----> Training classifier'
+        self.clf.fit(self.X, self.y)
+        print '-----> Saving classifier'
+        self.save_clf()
+
+
     def cross_validate(self):
         """
             trains classifier and cross_validates it 
@@ -214,13 +228,8 @@ class Predictor(object):
 
 
 
-
-
     def cross_validate(self):
         # get X,y dataset
-        X,y = self.train()
-        # randomly permute it
-        X,y = self.shuffle_in_unison(X,y)
         # instantiate the logistic regression
         LR = LogisticRegression()
         # get CV scores
@@ -248,12 +257,25 @@ class Predictor(object):
     ####################[ INTERFACE ]###############################################
     ################################################################################
 
-    def predict(self, data):
+    def predict(self, drugnames):
         """
             returns p(interaction|data) for each possible type 
             of interaction 
         """
-        raise NotImplementedError
+        #=====[ Load classifier if necsesary ]=====
+        if self.clf is None:
+            self.load_clf()
+
+        #=====[ Unpack ]=====
+        s1, s2 = drugnames[0], drugnames[1]
+        d1, d2 = self.db.query(s1), self.db.query(s2)
+        if d1 is None or d2 is None:
+            raise Exception("Something got fucked up: %s or %s not in db" % (s1, s2))
+
+        #=====[ Predict ]=====
+        features = self.featurize(d1, d2)
+        return self.clf.predict(features)
+
 
 
     def get_drugs(self):
