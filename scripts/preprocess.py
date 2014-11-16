@@ -73,6 +73,7 @@ def format_DRUG(df):
 	retain_columns(df, ['primaryid', 'drugname'])
 	df.drugname = df.drugname.str.lower().str.strip().astype('category')
 	df = df.groupby('primaryid').drugname.agg(lambda x: list(x))
+	df = df.apply(lambda x: list(set([y.split()[0] for y in x if type(y) == str])))
 	return df
 
 
