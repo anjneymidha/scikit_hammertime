@@ -21,6 +21,8 @@ import pandas as pd
 from util import *
 from sklearn import cross_validation
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 import pickle as pkl
 
 class Predictor(object):
@@ -85,7 +87,7 @@ class Predictor(object):
         pkl.dump(self.clf, open(clf_path, 'w'))
 
 
-    def train(self):
+    def to_datasets(self):
         """
             trains the classifier 
         """
@@ -93,6 +95,7 @@ class Predictor(object):
         #    self.load_data()
         # load the word2vec trained module
         drug2vec = w2v.train()
+        self.d2v = drug2vec
         # load the training
         self.load_training_examples()
         # make the training X,Y numpy matrix
@@ -116,11 +119,37 @@ class Predictor(object):
         outer_product = np.dot(vec1,vec2.T)
         diff = vec1 - vec2
         add = vec1 + vec2
+
         return np.hstack([diff,add])
+
+    def score(self):
+        X,y = self.to_datasets()
+        X,y = self.shuffle_in_unison(X,y)
+        train_X = X[:int(len(X)*.8)]
+        train_y = y[:int(len(X)*.8)]
+
+        test_X = X[int(len(X))*.8:]
+        test_y = y[int(len(X))*.8:]
+        # instantiate a bunch of classes
+        LR = LogisticRegression()
+        RF = RandomForestClassifier()
+        SVM = SVC()
+        # train
+        LR.fit(train_X,train_y)
+        RF.fit(train_X,train_y)
+        SVM.fit(train_X,train_y)
+
+        # test
+        print "LR score: "
+        print LR.score(test_X,test_y)
+        print "RF score: "
+        print RF.fit(test_X, test_y)
+        print "SVM score: "
+        print SVM.fit(test_X, test_y)
 
     def cross_validate(self):
         # get X,y dataset
-        X,y = self.train()
+        X,y = self.to_datasets()
         # randomly permute it
         X,y = self.shuffle_in_unison(X,y)
         # instantiate the logistic regression
@@ -150,13 +179,21 @@ class Predictor(object):
     ####################[ INTERFACE ]###############################################
     ################################################################################
 
-    def predict(self, data):
+    def predict(self, drug_rxcui_one, drug_rxcui_two):
         """
             returns p(interaction|data) for each possible type 
             of interaction 
         """
-        raise NotImplementedError
+        try:
+            return self.clf.predict(self.feature_engineering(self.d2v[drug_rxcui_one],self.d2v[drug_rxcui_two]))
+        except:
+            raise("Couldn't find those rxcuis"
 
+    def train(self):
+        X,y = self.to_datasets()
+        LR = LogisticRegression()
+        LR.train(X,y)
+        self.clf = LR
 
     def get_drugs(self):
         drugs = set()
