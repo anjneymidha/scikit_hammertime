@@ -9,7 +9,6 @@ from pytrie import StringTrie
 @app.before_first_request
 def init():
 
-	p = Predictor()
 	app.meditems = StringTrie()
 	drugs = ['advil','tylenol']
 
