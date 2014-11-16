@@ -40,7 +40,7 @@ def load_data(num_dfs=1, data_dir='/data/aers/formatted', verbose=True):
     return data
 
 def load_drug_names(path='/data/aers/formatted/drug_names.pkl'):
-    print '-----> Loading drugnames (%d)' % path
+    print '-----> Loading drugnames (%s)' % path
     return pkl.load(open(path, 'r'))
 
 

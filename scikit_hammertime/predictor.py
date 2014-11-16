@@ -38,10 +38,11 @@ class Predictor(object):
         """
             data_dir: location of parameters 
         """
+        print '=====[ CONSTRUCTING PREDICTOR ]====='
         self.data_dir = data_dir
         self.data = load_data()
         self.drug_names = load_drug_names()
-
+        print '=====[ CONSTRUCTION COMPLETE ]====='
 
 
 
