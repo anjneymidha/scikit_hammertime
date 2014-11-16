@@ -28,19 +28,44 @@ Fall 2014
 """
 import os
 import pickle
-from collections import defaultdict
+from collections import defaultdict, Counter
 from itertools import combinations
 import random
 import pandas as pd
 from scikit_hammertime import *
 
 
+def get_legal_drugs_reacs(df, num_occurrences=10, topn=50):
+	"""
+		returns a set of drugs
+	"""
+	occurrences_DRUG = []
+	occurrences_REAC = []
+	for ix, row in df.iterrows():
+		occurrences_DRUG += row.DRUG
+		occurrences_REAC += row.REAC
+
+	counts_DRUG = Counter(occurrences_DRUG)
+	counts_REAC = Counter(occurrences_REAC)
+
+	legal_DRUG = set([k for k in counts_DRUG.keys() if counts_DRUG[k] > num_occurrences])
+	legal_REAC = set([k[0] for k in counts_REAC.most_common(topn)])
+	return legal_DRUG, legal_REAC
+
+
+def get_legal_reacs(df, topn=100):
+	"""
+		returns set of reacs that are in the top 100
+	"""
+	occurrences = []
+	for ix,row in df.iterrows():
+		occurrences += row
+
 def get_X_y_positive(df):
 	"""
 		given a dataframe, gathers all pairs that occur together 
 		and maps them to their adverse effects 
 	"""
-	print '-----> Getting positive examples'
 	DRUGs, REACs = [], []
 	for ix, row in df.iterrows():
 
@@ -55,23 +80,12 @@ def get_X_y_positive(df):
 	return DRUGs, REACs
 
 
-def get_X_y_positive_paragraph(df):
-	"""
-		gets paragraph vec version of X_y
-	"""
-	print '-----> Getting positive examples'
-	DRUGs = list(df.DRUG)
-	REACs = list(df.REAC)
-	return DRUGs, REACs
 
-
-
-def get_cooccurrences(df):
+def get_co_occurrences(df):
 	"""
 		given a dataframe, returns
 			dict: Words -> Set of co-occurring words
 	"""
-	print '-----> Getting co-occurrences'
 	co_occurrence = defaultdict(lambda: set([]))
 	for ix, row in df.iterrows():
 
@@ -83,18 +97,17 @@ def get_cooccurrences(df):
 	return co_occurrence
 
 
-def get_X_y_negative(df, cooccurrences, num_samples):
+def get_X_y_negative(df, co_occurrences, num_samples=1000000):
 	"""
 		given a dataframe, returns sets that never 
 		occurred together
 	"""
-	print '-----> Getting negative examples'
 	DRUGs_neg = []
 	for i in range(num_samples):
-		d1 = random.choice(cooccurrences.keys())
-		d2 = random.choice(cooccurrences.keys())
-		while d2 == d1 or d2 in cooccurrences[d1]:
-			d2 = random.choice(cooccurrences.keys())
+		d1 = random.choice(co_occurrences.keys())
+		d2 = random.choice(co_occurrences.keys())
+		while d2 == d1 or d2 in co_occurrences[d1]:
+			d2 = random.choice(co_occurrences.keys())
 		DRUGs_neg.append((d1, d2))
 	
 		if i % 1000 == 0:
@@ -106,50 +119,6 @@ def get_X_y_negative(df, cooccurrences, num_samples):
 	return DRUGs_neg, REACs_neg
 
 
-def get_X_y_negative_paragraph(df, cooccurrences, num_samples):
-	"""
-		given a dataframe, returns sets that never 
-		occurred together
-	"""
-	print '-----> Getting negative examples'
-	DRUGs_neg = []
-	for i in range(num_samples):
-
-		num_elements = 
-
-		d1 = random.choice(cooccurrences.keys())
-		d2 = random.choice(cooccurrences.keys())
-		while d2 == d1 or d2 in cooccurrences[d1]:
-			d2 = random.choice(cooccurrences.keys())
-		DRUGs_neg.append((d1, d2))
-	
-		if i % 1000 == 0:
-			print '	%d' % i
-	
-
-	REACs_neg = [[]]*len(DRUGs_neg)
-
-	return DRUGs_neg, REACs_neg
-
-
-def make_training_set(input_dir='/data/aers/formatted', output_dir='/data/aers/training', num_dfs=1):
-	"""
-		returns DRUGS, REACs
-		DRUGs: list of tuples of DRUGs that either occur together or dont 
-		REACs: list of reactions that occur when they occur together 
-	"""
-
-	#=====[ Step 1: load in dataframes to 'data'	]=====
-	data = load_data(num_dfs=1, data_dir=input_dir, verbose=True)
-
-	#=====[ Step 3: get positive examples	]=====
-	DRUGs_pos, REACs_pos = get_X_y_positive(data)
-
-	#=====[ Step 4: get negative examples	]=====
-	co_occurrences = get_cooccurrences(data)
-	DRUGs_neg, REACs_neg = get_X_y_negative(data, co_occurrences, 250000)
-
-	return DRUGs_neg + DRUGs_pos, REACs_neg + REACs_pos
 
 
 
@@ -160,10 +129,37 @@ def make_training_set(input_dir='/data/aers/formatted', output_dir='/data/aers/t
 
 if __name__ == '__main__':
 
-	DRUGs, REACs = make_training_set()
+	#=====[ Step 1: load in dataframes to 'data'	]=====
+	print '-----> Loading data'
+	data = load_data(num_dfs=1, data_dir='/data/aers/formatted/', verbose=False)
+
+	#=====[ Step 2: get the legal drugs	]=====
+	print '-----> Getting legal drugs'
+	legal_DRUG, legal_REAC = get_legal_drugs_reacs(data, num_occurrences=10, topn=50)
+
+	#=====[ Step 3: reduce dataset to only legal drugs	]=====
+	print '-----> Reducing data.DRUGS to only legal drugs'
+	data.DRUG = data.DRUG.apply(lambda l: [x for x in l if x in legal_DRUG])
+	data.REAC = data.REAC.apply(lambda l: [x for x in l if x in legal_REAC])
+
+	#=====[ Step 3: get positives	]=====
+	print '-----> Getting X, y positive'
+	DRUGs_pos, REACs_pos = get_X_y_positive(data)
+
+	#=====[ Step 4: get coocurrences	]=====
+	print '-----> Getting coocurrences'
+	co_occurrences = get_co_occurrences(data)
+
+	#=====[ Step 5: get negative reactions	]=====
+	print '-----> Getting X, y negative'
+	DRUGs_neg, REACs_neg = get_X_y_negative(data, co_occurrences)
+
+
 	print '-----> Saving to pickle'
-	pickle.dump(DRUGs, open('DRUGs.pkl', 'w'))
-	pickle.dump(REACs, open('REACs.pkl', 'w'))	
+	DRUGs = DRUGs_pos + DRUGs_neg 
+	REACs = REACs_pos + REACs_neg
+	pickle.dump(DRUGs, open('/data/aers/training/DRUGs.pkl', 'w'))
+	pickle.dump(REACs, open('/data/aers/training/REACs.pkl', 'w'))	
 
 
 
