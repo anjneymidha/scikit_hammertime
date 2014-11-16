@@ -1,5 +1,7 @@
 ## <h1>React: Drug Safety in Your Pocket</h1>
 
+Demo: http://ec2-54-67-36-107.us-west-1.compute.amazonaws.com:8888/static/index.html#/
+
 ![React](http://i.imgur.com/LVCxUoM.png)<br>
 **Team: scikit_hammertime**<br>
 ==================================<br>
