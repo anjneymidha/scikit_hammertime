@@ -34,13 +34,14 @@ class Predictor(object):
     clf_filename = 'clf.pkl'
 
 
-    def __init__(self, data_dir='/data/aers/formatted/'):
+    def __init__(self, data_dir='/data/aers/production/'):
         """
             data_dir: location of parameters 
         """
-        print '=====[ CONSTRUCTING PREDICTOR ]====='
         self.data_dir = data_dir
-        self.data = load_data()
+
+        print '=====[ CONSTRUCTING PREDICTOR ]====='
+        self.load_training_examples()
         self.drug_names = load_drug_names()
         self.clf = self.load_clf()
         print '=====[ CONSTRUCTION COMPLETE ]====='
@@ -48,10 +49,11 @@ class Predictor(object):
 
 
     ################################################################################
-    ####################[ INTERNALS  ]##############################################
+    ####################[ LOADING/SAVING ]##########################################
     ################################################################################
 
     def load_training_examples(self):
+        print '-----> Loading training examples'
         self.training_tuples = pkl.load(open('/data/aers/training/DRUGs.pkl'))
         self.training_reacs = pkl.load(open('/data/aers/training/REACs.pkl'))
 
@@ -78,32 +80,33 @@ class Predictor(object):
         pkl.dump(self.clf, open(clf_path, 'w'))
 
 
-    def train(self, ndim=50, min_count=10):
-        """
-            trains the classifier 
-        """
-        #=====[ Step 1: train word2vec ]=====
-        print '=====[ TRAINING ]====='
-        print '-----> Training word2vec'
-        self.drug2vec = gensim.models.word2vec.Word2Vec(df.DRUG, size=ndim, min_count=min_count, sg=0)
-        drug2vec = w2v.train()
-        # load the training
-        self.load_training_examples()
-        # make the training X,Y numpy matrix
-        X = []
-        y = []
-        for i in range(len(self.training_tuples)):
-            training_tuple = self.training_tuples[i]
-            try:
-                X.append(self.feature_engineer(drug2vec[training_tuple[0]],drug2vec[training_tuple[1]]))
-                y.append(len(self.training_reacs[i]) > 0)
-            except:
-                continue
-        X = np.array(X)
-        y = np.array(y)
-        return X,y
+    
 
-    def feature_engineer(self, vec1, vec2):
+    def load_data(self, name='classifier.pkl'):
+        """
+            loads:
+                X, y, drug2vec, clf (if exists)
+        """
+        print '=====[ LOADING DATA ]====='
+        print '-----> Loading: drug2vec'
+        
+
+
+
+
+    def save_data(self):
+        """
+            saves:
+                X, y, drug2vec, clf
+        """
+        pickle.load()
+
+
+    ################################################################################
+    ####################[ TRAINING  ]###############################################
+    ################################################################################
+
+    def featurize(self, vec1, vec2):
         """
             returns a numpy feature array for the two drugs vec1 and vec2
         """
@@ -111,6 +114,80 @@ class Predictor(object):
         diff = vec1 - vec2
         add = vec1 + vec2
         return np.hstack([diff,add])
+
+
+    def get_X_y(self):
+        """
+            returns X, y
+        """
+        X, y = [], []
+        for drug_tup, reac_tup in zip(self.training_tuples, self.training_reacs):
+            try:
+                X.append(self.featurize(drug_tup[0], drug_tup[1]))
+                y.append(len(reac_tup) > 0)
+            except:
+                continue
+        return np.array(X), np.array(y)
+
+    
+    def shuffle_in_unison(self, a, b):
+        """
+            shuffles a and b to randomize 
+        """
+        assert len(a) == len(b)
+        shuffled_a = np.empty(a.shape, dtype=a.dtype)
+        shuffled_b = np.empty(b.shape, dtype=b.dtype)
+        permutation = np.random.permutation(len(a))
+        for old_index, new_index in enumerate(permutation):
+            shuffled_a[new_index] = a[old_index]
+            shuffled_b[new_index] = b[old_index]
+        return shuffled_a, shuffled_b
+
+
+    def gather_production_data(self, ndim=50, min_count=10):
+        """
+            gets X, y, drug2vec; saves them in /data/aers/production
+        """
+        #=====[ Step 1: train word2vec ]=====
+        print '=====[ GATHER PRODUCTION DATA: BEGIN ]====='
+        print '-----> Training drug2vec'
+        self.drug2vec = gensim.models.word2vec.Word2Vec(df.DRUG, size=ndim, min_count=min_count, sg=0).train()
+
+        #=====[ Step 2: save word2vec ]=====
+        print '-----> Saving drug2vec'
+        pickle.dump(self.drug2vec, open(os.path.join(self.data_dir, 'drug2vec.pkl'), 'w'))
+
+        #=====[ Step 3: make X and y ]=====
+        print '-----> Making X, y'
+        self.X, self.y = self.get_X_y()
+
+        #=====[ Step 4: shuffle X, y ]=====
+        print '-----> Shuffling X, y'
+        self.X, self.y = self.shuffle_in_unison(self.X, self.y)
+
+        #=====[ Step 5: save X, y  ]=====
+        print '-----> Saving X, y (data_dir/X.pkl, data_dir/y.pkl)'
+        pickle.dump(self.X, open(os.path.join(self.data_dir, 'X.pkl'), 'w'))
+        pickle.dump(self.y, open(os.path.join(self.data_dir, 'y.pkl'), 'w'))
+
+        print '=====[ GATHER PRODUCTION DATA: COMPLETE ]====='
+
+
+    def cross_validate(self):
+        """
+            trains classifier and cross_validates it 
+        """
+        #=====[ Step 1: Ensure data is there ]=====
+        if self.X is None or self.y is None:
+            self.gather_production_data()
+
+        #=====[ Step ]=====
+
+
+
+
+
+
 
     def cross_validate(self):
         # get X,y dataset
