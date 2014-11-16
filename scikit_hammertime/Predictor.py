@@ -171,7 +171,7 @@ class Predictor(object):
 
         #=====[ Step 1: train word2vec ]=====
         print '-----> Training drug2vec'
-        self.drug2vec = gensim.models.word2vec.Word2Vec(self.training_tuples, size=ndim, min_count=min_count, sg=0).train()
+        self.drug2vec = gensim.models.word2vec.Word2Vec(self.training_tuples, size=ndim, min_count=min_count, sg=0)
 
         #=====[ Step 3: make X and y ]=====
         print '-----> Making X, y'
