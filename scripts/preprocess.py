@@ -27,7 +27,9 @@ Fall 2014
 ##################
 """
 import os
+import pickle
 import pandas as pd
+
 
 
 def parse_quarter_dirname(quarter_dir):
@@ -53,37 +55,6 @@ def parse_filename(filepath):
 	return file_descriptor, year, quarter
 
 
-def parse_quarter_dir(quarter_dir):
-	"""
-		given a path to a directory containing data files, 
-		(i.e. data/faers_ascii_2014q1)
-		returns a dataframe containing all the information
-	"""
-	#=====[ Step 1: Get ascii_dir, name	]=====
-	year, quarter = parse_quarter_dirname(quarter_dir)
-	print '=====[ %d, %d ]=====' % (year, quarter)
-	ascii_dir = os.path.join(quarter_dir, 'ascii')
-	if not os.path.exists(ascii_dir):
-		ascii_dir = os.path.join(quarter_dir, 'ASCII')
-	assert os.path.exists(ascii_dir)
-
-
-	#=====[ Step 2: load all files	]=====
-	grab_files = ['DRUG', 'INDI', 'REAC']
-	dfs = {}	
-	data_paths = [os.path.join(ascii_dir, p) for p in os.listdir(ascii_dir) if p.lower().endswith('.txt') and p[:4] in grab_files]
-	for p in data_paths:
-		file_descriptor, year, quarter = parse_filename(p)
-		print '	---> %s' % file_descriptor
-		try:
-			dfs[file_descriptor] = pd.read_csv(open(p, 'r'), delimiter='$')
-		except:
-			print '		###[ PANDAS READ ERROR ]###'
-
-	return dfs
-
-
-
 
 ################################################################################
 ####################[ FORMAT INDIVIDUAL FILES	]###############################
@@ -101,31 +72,88 @@ def retain_columns(df, col_list):
 def format_DRUG(df):
 	retain_columns(df, ['primaryid', 'drugname'])
 	df.drugname = df.drugname.str.lower().str.strip().astype('category')
+	df = df.groupby('primaryid').drugname.agg(lambda x: list(x))
+	return df
 
 
 def format_REAC(df):
 	retain_columns(df, ['primaryid', 'pt'])
+	df.pt = df.pt.str.lower().str.strip().astype('category')
+	df = df.groupby('primaryid').pt.agg(lambda x: list(x))
+	return df
+
+
 
 def format_INDI(df):
-	pass
+	retain_columns(df, ['primaryid', 'indi_pt'])
+	df.indi_pt = df.indi_pt.str.lower().str.strip().astype('category')
+	df = df.groupby('primaryid').indi_pt.agg(lambda x: list(x))
+	return df
 
 
+def format_quarter(quarter_dir):
+	"""
+		given a path to a directory containing data files, 
+		(i.e. data/faers_ascii_2014q1)
+		returns a dataframe containing all the information
+	"""
+	#=====[ Step 1: Get ascii_dir, name	]=====
+	year, quarter = parse_quarter_dirname(quarter_dir)
+	print '=====[ %d, %d ]=====' % (year, quarter)
+	ascii_dir = os.path.join(quarter_dir, 'ascii')
+	if not os.path.exists(ascii_dir):
+		ascii_dir = os.path.join(quarter_dir, 'ASCII')
+	assert os.path.exists(ascii_dir)
 
 
+	#=====[ Step 2: load/format each independently	]=====
+	dfs = {}
+	format_funcs = {
+						'DRUG':format_DRUG,
+						'REAC':format_REAC,
+						'INDI':format_INDI
+	}
+	for filename in [os.path.join(ascii_dir, p) for p in os.listdir(ascii_dir) if p.endswith('.txt')]:
 
-def preprocess(input_dir='/data/aers/entries'):
+		file_descriptor, year, quarter = parse_filename(filename)
+		if file_descriptor in format_funcs.keys() and filename.endswith('.txt'):
+			
+			print '	---> Loading: %s' % file_descriptor
+			df = pd.read_csv(filename, delimiter='$')
 
+			print '	---> Formatting: %s' % file_descriptor
+			df = format_funcs[file_descriptor](df)
+
+			dfs[file_descriptor] = df
+
+	#=====[ Step 3: join on primaryid	]=====
+	joined = pd.concat(dfs.values(), keys=dfs.keys(), axis=1)
+	return joined
+
+
+def preprocess(input_dir='/data/aers/entries', output_dir='/data/aers/formatted'):
 	data_dir = input_dir
 
 	process_years = [2013, 2014]
+	process_quarters = [1, 2, 3, 4]
 
 	#=====[ Step 1: For each quarter... ]=====
 	dfs = []
 	quarter_dirs = [os.path.join(data_dir, p) for p in os.listdir(data_dir)]
 	for quarter_dir in quarter_dirs:
+
 		year, quarter = parse_quarter_dirname(quarter_dir)
-		if year in process_years:
-			dfs.append(parse_quarter_dir(quarter_dir))
+		if year in process_years and quarter in process_quarters:
+
+			dump_path_pickle = os.path.join(output_dir, str(year) + 'q' + str(quarter) + '.df')
+			dump_path_csv = os.path.join(output_dir, str(year) + 'q' + str(quarter) + '.csv')
+			df = format_quarter(quarter_dir)
+
+			pickle.dump(df, open(dump_path_pickle, 'w'))
+			df.to_csv(open(dump_path_csv, 'w'))
+			print '-----> Dumping to: %s' % dump_path_pickle
+			
+			dfs.append(df)
 
 	return dfs
 
@@ -139,3 +167,4 @@ def preprocess(input_dir='/data/aers/entries'):
 
 if __name__ == '__main__':
 	dfs = preprocess()
+
