@@ -4,5 +4,5 @@
   "password": "Jay1234",
   "host": "http://ec2-54-67-36-107.us-west-1.compute.amazonaws.com:80/",
   "instance_id": "i-ba93de72",
-  "directory": "/Users/ankitkumar/Documents/projects/scikit_hammertime"
+  "directory": "/Users/jayhack/CS/DS/scikit_hammertime"
 }
