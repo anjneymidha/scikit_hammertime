@@ -277,8 +277,8 @@ class Predictor(object):
         #=====[ Predict ]=====
         features = self.featurize(d1, d2)
         predictions =   [ 
-                            {'AE':'Interaction', 'score':self.clf.predict_proba(features)[0][0]},
-                            {'AE':'No interaction', 'score':self.clf.predict_proba(features)[0][1]}
+                            {'AE':'Interaction', 'score':self.clf.predict_proba(features)[0][1]},
+                            {'AE':'No interaction', 'score':self.clf.predict_proba(features)[0][0]}
                         ] 
         return predictions
 
