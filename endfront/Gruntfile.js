@@ -194,6 +194,11 @@ module.exports = function (grunt) {
           generatedImagesDir: '<%= yeoman.dist %>/images/generated'
         }
       },
+      devDist: {
+        options: {
+          cssDir: '<%= yeoman.dist %>/styles'  
+        }
+      },
       server: {
         options: {
           debugInfo: true
@@ -355,6 +360,17 @@ module.exports = function (grunt) {
           dest: '<%= yeoman.dist %>'
         }]
       },
+      devDist: {         
+        files: [{
+          expand: true,
+          dot: true,
+          cwd: '<%= yeoman.app %>',
+          dest: '<%= yeoman.dist %>',
+          src: [
+            '**','!styles/**'   // everything but styles/
+          ]
+        }]
+      },
       styles: {
         expand: true,
         cwd: '<%= yeoman.app %>/styles',
@@ -437,5 +453,11 @@ module.exports = function (grunt) {
     'newer:jshint',
     'test',
     'build'
+  ]);
+
+  grunt.registerTask('devDist', [
+    'clean:dist',
+    'copy:devDist',
+    'compass:devDist'
   ]);
 };
