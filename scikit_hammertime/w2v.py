@@ -1,7 +1,7 @@
 import gensim
 import pickle as pkl
 from util import *
-def train(ndim=50, min_count=10):
+def train(df, ndim=50, min_count=10):
     '''
     trains and dumps a word2vec model with ndim dimensions, counting only drug names that occur more than min_count times
     '''

@@ -78,13 +78,14 @@ class Predictor(object):
         pkl.dump(self.clf, open(clf_path, 'w'))
 
 
-    def train(self):
+    def train(self, ndim=50, min_count=10):
         """
             trains the classifier 
         """
-       # if self.data is None:
-        #    self.load_data()
-        # load the word2vec trained module
+        #=====[ Step 1: train word2vec ]=====
+        print '=====[ TRAINING ]====='
+        print '-----> Training word2vec'
+        self.drug2vec = gensim.models.word2vec.Word2Vec(df.DRUG, size=ndim, min_count=min_count, sg=0)
         drug2vec = w2v.train()
         # load the training
         self.load_training_examples()
