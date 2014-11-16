@@ -14,4 +14,9 @@ class DB():
 		c = self.db.cursor()
 		results = c.execute(q)
 		r=c.fetchone()
-		return r[0]
+
+		#=====[ Return parsing	]=====
+		if r is None or r is type(None):
+			return r
+		else:
+			return r[0]
