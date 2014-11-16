@@ -455,9 +455,4 @@ module.exports = function (grunt) {
     'build'
   ]);
 
-  grunt.registerTask('devDist', [
-    'clean:dist',
-    'copy:devDist',
-    'compass:devDist'
-  ]);
 };
