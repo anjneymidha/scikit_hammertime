@@ -23,7 +23,7 @@ from util import *
 from sklearn import cross_validation
 from sklearn.linear_model import LogisticRegression
 import gensim
-import pickle as pkl
+import pickle
 
 
 class Predictor(object):
@@ -44,6 +44,7 @@ class Predictor(object):
 
         print '=====[ CONSTRUCTING PREDICTOR ]====='
         self.drug_names = load_drug_names()
+        self.drug_df = self.load_drug_dataframe()
         print '=====[ CONSTRUCTION COMPLETE ]====='
 
 
@@ -57,8 +58,8 @@ class Predictor(object):
 
 
     def load_training_examples(self):
-        self.training_tuples = pkl.load(open('/data/aers/training/DRUGs.pkl'))
-        self.training_reacs = pkl.load(open('/data/aers/training/REACs.pkl'))
+        self.training_tuples = pickle.load(open('/data/aers/training/DRUGs.pkl'))
+        self.training_reacs = pickle.load(open('/data/aers/training/REACs.pkl'))
 
 
 
@@ -175,9 +176,6 @@ class Predictor(object):
         print '-----> Loading training examples'
         self.load_training_examples()
 
-        print '-----> Loading drug_df'
-        self.data = self.load_drug_dataframe()
-
         #=====[ Step 1: train word2vec ]=====
         print '-----> Training drug2vec'
         self.drug2vec = gensim.models.word2vec.Word2Vec(self.drug_df.DRUG, size=ndim, min_count=min_count, sg=0)
@@ -256,7 +254,7 @@ class Predictor(object):
 
     def get_conditions(self):
         conditions = set()
-        for l in self.data.INDI:
+        for l in self.drug_df.INDI:
             if type(l) == list:
                 for term in l:
                     conditions.add(term)
@@ -266,7 +264,7 @@ class Predictor(object):
 
     def get_reactions(self):
         reactions = set()
-        for l in self.data.REAC:
+        for l in self.drug_df.REAC:
             if type(l) == list:
                 for term in l:
                     reactions.add(term)
