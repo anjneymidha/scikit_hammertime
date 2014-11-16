@@ -33,7 +33,7 @@ class Predictor(object):
             data_dir: location of parameters 
         """
         self.load_data()
-        
+
 
     ################################################################################
     ####################[ INTERNALS  ]##############################################
@@ -47,8 +47,11 @@ class Predictor(object):
         data_path = os.path.join(self.data_dir, name)
         if os.path.exists(data_path):
             self.data = pkl.load(open(data_path, 'r'))
+            if not type(data) == tuple and len(data) == 2:
+                raise Exception("Incorrectly formatted data")
         else:
             self.data = None
+
 
 
     def load_clf(self, name='classifier.pkl'):
@@ -72,13 +75,20 @@ class Predictor(object):
         pkl.dump(self.clf, open(clf_path, 'w'))
 
 
-
     def train(self):
         """
             trains the classifier 
         """
-        raise NotImplementedError
+        
 
+
+
+
+
+
+    ################################################################################
+    ####################[ INTERFACE ]###############################################
+    ################################################################################
 
     def predict(self, data):
         """
