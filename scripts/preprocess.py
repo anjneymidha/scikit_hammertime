@@ -112,7 +112,7 @@ def format_quarter(quarter_dir):
 						'DRUG':format_DRUG,
 						'REAC':format_REAC,
 						'INDI':format_INDI
-	}
+					}
 	for filename in [os.path.join(ascii_dir, p) for p in os.listdir(ascii_dir) if p.endswith('.txt')]:
 
 		file_descriptor, year, quarter = parse_filename(filename)
