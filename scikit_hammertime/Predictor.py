@@ -18,6 +18,7 @@ import numpy as np
 import os
 import w2v
 import pandas as pd
+from collections import Counter
 import util
 from util import *
 from SQL import DB
@@ -304,8 +305,8 @@ class Predictor(object):
                 drug_tuple = tuple(sorted([drug_one, drug_two]))
                 interactions += self.lookup_table[drug_tuple]
         c = Counter(interactions)
-        new_list = [y[0] for y in sorted([(x,c[x]) for x in c], key=lambda x:x[1])[::-1]
-        return predictions,new_list[4]
+        new_list = [y[0] for y in sorted([(x,c[x]) for x in c], key=lambda x:x[1])[::-1]]
+        return predictions, new_list[:4]
 
 
 
