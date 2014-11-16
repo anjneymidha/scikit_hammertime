@@ -1,7 +1,20 @@
-scikit_hammertime
-=================
-Jake Beard, Anjney Midha, Ankit Kumar, Jay Hack, Ross Lazerowitz
+## <h1>React: Drug Safety in Your Pocket</h1>
 
-Bayes Impact Hackathon 2014
+![React](/http://i.imgur.com/LVCxUoM.png)
+**Team: scikit_hammertime**<br>
+==================================<br>
+Jake Beard: jake at minnow dot io <br>
+Anjney Midha: anjney at stanford dot edu<br>
+Ankit Kumar: ankitk at stanford dot edu<br>
+Jay Hack: jhack at stanford dot edu<br>
+Ross Lazerowitz: rosslazer at gmail dot com<br>
 
-# Overview:
+Bayes Impact Hackathon 2014<br>
+==================================<br>
+**The Problem:**<br>
+- 100,000 Americans die each year due to known drug side effect
+- Existing tools for users to search for adverse drug interactions are clunky, database level query interfaces
+- Existing tools are limited to reported drug events - which are severely prone to underreporting
+
+**Solution:**<br>
+- We use a distributed representation of the AERS ( Federal Drug Adverse Event Reporting System) dataset classified by the RxNorm hierarchy, using neural networks to predict novel interactions for pairs of drugs that do not have a historical interaction record
