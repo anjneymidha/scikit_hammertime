@@ -140,7 +140,7 @@ if __name__ == '__main__':
 
 
 	print '-----> Saving to pickle'
-	DRUGs = DRUGs_pos + DRUGs_neg, 
+	DRUGs = DRUGs_pos + DRUGs_neg 
 	REACs = REACs_pos + REACs_neg
 	pickle.dump(DRUGs, open('DRUGs.pkl', 'w'))
 	pickle.dump(REACs, open('REACs.pkl', 'w'))	
