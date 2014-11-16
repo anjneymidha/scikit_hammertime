@@ -42,6 +42,7 @@ class Predictor(object):
         self.data_dir = data_dir
         self.data = load_data()
         self.drug_names = load_drug_names()
+        self.clf = self.load_clf()
         print '=====[ CONSTRUCTION COMPLETE ]====='
 
 
@@ -62,9 +63,10 @@ class Predictor(object):
         print '-----> Loading clf'
         clf_path = os.path.join(self.data_dir, name)
         if os.path.exists(clf_path):
-            self.clf = pkl.load(open(clf_path))
+            clf = pkl.load(open(clf_path))
         else:
-            self.clf = None
+            clf = None
+        return clf
 
 
     def save_clf(self, name='classifier.pkl'):
@@ -104,7 +106,7 @@ class Predictor(object):
         """
             returns a numpy feature array for the two drugs vec1 and vec2
         """
-        outer_product = np.dot(vec1,vec2.T)
+        # outer_product = np.dot(vec1,vec2.T)
         diff = vec1 - vec2
         add = vec1 + vec2
         return np.hstack([diff,add])

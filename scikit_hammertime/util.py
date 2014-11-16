@@ -32,11 +32,6 @@ def load_data(num_dfs=1, data_dir='/data/aers/formatted', verbose=True):
     df_paths = [os.path.join(data_dir, p) for p in os.listdir(data_dir) if p.endswith('.df')]
     dfs = [pkl.load(open(p, 'r')) for p in df_paths[:num_dfs]]
     data = pd.concat(dfs, axis=0)
-
-    if verbose:
-        print '==========[ DATA: ]=========='
-        print data.head()
-
     return data
 
 
