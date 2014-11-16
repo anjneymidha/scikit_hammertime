@@ -4,13 +4,13 @@ Script: util.py
 
 Description:
 ------------
-	
-	utilities for dealing with data
+    
+    utilities for dealing with data
 
 Usage:
 ------
 
-	python preprocess.py -i $DATA_DIR -o data.df
+    python preprocess.py -i $DATA_DIR -o data.df
 
 ##################
 Jay Hack
@@ -23,25 +23,25 @@ import pickle as pkl
 import pandas as pd
 
 def load_data(num_dfs=1, data_dir='/data/aers/formatted', verbose=True):
-	"""
-		loads and concatenates the specified number of dataframes 
-	"""
-	if verbose:
-		print '-----> Loading data (%d dataframes)' % num_dfs
+    """
+        loads and concatenates the specified number of dataframes 
+    """
+    if verbose:
+        print '-----> Loading data (%d dataframes)' % num_dfs
 
-	df_paths = [os.path.join(data_dir, p) for p in os.listdir(data_dir) if p.endswith('.df')]
-	dfs = [pkl.load(open(p, 'r')) for p in df_paths[:num_dfs]]
-	data = pd.concat(dfs, axis=0)
+    df_paths = [os.path.join(data_dir, p) for p in os.listdir(data_dir) if p.endswith('.df')]
+    dfs = [pkl.load(open(p, 'r')) for p in df_paths[:num_dfs]]
+    data = pd.concat(dfs, axis=0)
 
-	if verbose:
-		print '==========[ DATA: ]=========='
-		print data.head()
+    if verbose:
+        print '==========[ DATA: ]=========='
+        print data.head()
 
-	return data
+    return data
 
 def load_drug_names(path='/data/aers/formatted/drug_names.pkl'):
-	print '-----> Loading drugnames (%d)' % path
-    return pickle.load(open(path, 'r'))
+    print '-----> Loading drugnames (%d)' % path
+    return pkl.load(open(path, 'r'))
 
 
 
