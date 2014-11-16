@@ -29,6 +29,7 @@ Fall 2014
 import os
 import pickle
 import pandas as pd
+from scikit_hammertime import *
 
 
 
@@ -76,7 +77,7 @@ def format_DRUG(df):
 
 	#=====[ Map drugnames to ids	]=====
 	db = DB()
-	df = df.apply(lambda x: list(set([db.query(y) for y in x if not db.query is None])))
+	df = df.apply(lambda x: list(set([db.query(y) for y in x if not db.query(y) is None])))
 	return df
 
 
