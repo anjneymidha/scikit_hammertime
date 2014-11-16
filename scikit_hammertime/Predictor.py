@@ -146,6 +146,7 @@ class Predictor(object):
         #=====[ Step 1: get drug vectors ]=====
         vec1, vec2 = self.drug2vec[drug1], self.drug2vec[drug2]
 
+
         #=====[ Step 2: combos of them ]=====
         # outer_product = np.dot(vec1,vec2.T)
         diff = vec1 - vec2
@@ -274,10 +275,11 @@ class Predictor(object):
         #=====[ Unpack ]=====
         s1, s2 = drugnames[0], drugnames[1]
         d1, d2 = self.db.query(s1), self.db.query(s2)
+        print d1, d2
         if d1 is None or d2 is None:
             raise Exception("Something got fucked up: %s or %s not in db" % (s1, s2))
-
-      
+        if not d1 in self.drug2vec or not d2 in self.drug2vec:
+            return [],[]
 
         #=====[ Predict ]=====
         features = self.featurize(d1, d2)
