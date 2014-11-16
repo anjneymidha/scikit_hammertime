@@ -60,24 +60,30 @@ def parse_drug_ind_ther(df):
 	df.groupby()
 
 
-def parse_ascii_directory(path):
+def parse_quarter_dir(quarter_dir):
 	"""
 		given a path to a directory containing data files, 
 		(i.e. data/faers_ascii_2014q1)
 		returns a dataframe containing all the information
 	"""
-	#=====[ Step 1: ascii dir	]=====
-	path = os.path.join(path, 'ascii')
-	assert os.path.exists(path)
+	#=====[ Step 1: Get ascii_dir, name	]=====
+	year, quarter = parse_quarter_dirname(quarter_dir)
+	print '=====[ %d, %d ]=====' % (year, quarter)
+	ascii_dir = os.path.join(quarter_dir, 'ascii')
+	if not os.path.exists(ascii_dir):
+		ascii_dir = os.path.join(quarter_dir, 'ASCII')
 
-	#=====[ Step 2: fill 'dfs' with dict mapping filetype to df	]=====
+	#=====[ Step 2: load all files	]=====
 	dfs = {}	
-	data_paths = [os.path.join(path, p) for p in os.listdir(path) if p.endswith('.txt')]
-	with click.progressbar(data_paths) as _data_paths:
-		for p in _data_paths:
-			print ' : %s' % p
-			file_descriptor, year, quarter = parse_filename(p)
+	assert os.path.exists(ascii_dir)
+	data_paths = [os.path.join(ascii_dir, p) for p in os.listdir(ascii_dir) if p.lower().endswith('.txt')]
+	for p in data_paths:
+		file_descriptor, year, quarter = parse_filename(p)
+		print '	---> %s' % file_descriptor
+		try:
 			dfs[file_descriptor] = pd.read_csv(open(p, 'r'), delimiter='$')
+		except:
+			print '		###[ PANDAS READ ERROR ]###'
 
 	return dfs
 
@@ -92,19 +98,20 @@ def parse_ascii_directory(path):
 
 import click
 @click.command()
-@click.option('-i', '--input_dir', help='Input directory containing ascii files')
+@click.option('-i', '--input_dir', help='Input directory containing ascii files', default='/data/aers/entries')
 @click.option('-o', '--output', help='Input directory containing ascii files')
 def preprocess(input_dir, output):
 
 	data_dir = input_dir
 
 	#=====[ Step 1: For each quarter... ]=====
-	quarter_dirs = [os.path.join(data_dir, p) for p in os.listdir(input_dir)]
+	quarter_dirs = [os.path.join(data_dir, p) for p in os.listdir(data_dir)]
 	for quarter_dir in quarter_dirs:
+		dfs = parse_quarter_dir(quarter_dir)
 
-		#=====[ Step 2: parse 	]=====
-		year, quarter = parse_quarter_dirname(quarter_dir)
-		print '%s: %d, %d' % (quarter_dir, year, quarter)
+
+
+
 
 
 
