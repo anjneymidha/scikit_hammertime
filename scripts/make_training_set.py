@@ -35,16 +35,31 @@ import pandas as pd
 from scikit_hammertime import *
 
 
-def get_legal_drugs(df, num_occurrences=10):
+def get_legal_drugs_reacs(df, num_occurrences=10, topn=50):
 	"""
 		returns a set of drugs
 	"""
-	occurrences = []
+	occurrences_DRUG = []
+	occurrences_REAC = []
 	for ix, row in df.iterrows():
-		occurrences += row.DRUG
-	counts = Counter(occurrences)
-	return set([k for k in counts.keys() if counts[k] > num_occurrences])
+		occurrences_DRUG += row.DRUG
+		occurrences_REAC += row.REAC
 
+	counts_DRUG = Counter(occurrences_DRUG)
+	counts_REAC = Counter(occurrences_REAC)
+
+	legal_DRUG = set([k for k in counts_DRUG.keys() if counts_DRUG[k] > num_occurrences])
+	legal_REAC = set([k[0] for k in counts_REAC.most_common(topn)])
+	return legal_DRUG, legal_REAC
+
+
+def get_legal_reacs(df, topn=100):
+	"""
+		returns set of reacs that are in the top 100
+	"""
+	occurrences = []
+	for ix,row in df.iterrows():
+		occurrences += row
 
 def get_X_y_positive(df):
 	"""
@@ -82,7 +97,7 @@ def get_co_occurrences(df):
 	return co_occurrence
 
 
-def get_X_y_negative(df, co_occurrences, num_samples=250000):
+def get_X_y_negative(df, co_occurrences, num_samples=1000000):
 	"""
 		given a dataframe, returns sets that never 
 		occurred together
@@ -120,11 +135,12 @@ if __name__ == '__main__':
 
 	#=====[ Step 2: get the legal drugs	]=====
 	print '-----> Getting legal drugs'
-	legal_drugs = get_legal_drugs(data, num_occurrences=10)
+	legal_DRUG, legal_REAC = get_legal_drugs_reacs(data, num_occurrences=10, topn=50)
 
 	#=====[ Step 3: reduce dataset to only legal drugs	]=====
 	print '-----> Reducing data.DRUGS to only legal drugs'
-	data.DRUG = data.DRUG.apply(lambda l: [x for x in l if x in legal_drugs])
+	data.DRUG = data.DRUG.apply(lambda l: [x for x in l if x in legal_DRUG])
+	data.REAC = data.REAC.apply(lambda l: [x for x in l if x in legal_REAC])
 
 	#=====[ Step 3: get positives	]=====
 	print '-----> Getting X, y positive'
@@ -142,8 +158,8 @@ if __name__ == '__main__':
 	print '-----> Saving to pickle'
 	DRUGs = DRUGs_pos + DRUGs_neg 
 	REACs = REACs_pos + REACs_neg
-	pickle.dump(DRUGs, open('DRUGs.pkl', 'w'))
-	pickle.dump(REACs, open('REACs.pkl', 'w'))	
+	pickle.dump(DRUGs, open('/data/aers/training/DRUGs.pkl', 'w'))
+	pickle.dump(REACs, open('/data/aers/training/REACs.pkl', 'w'))	
 
 
 
