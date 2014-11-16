@@ -20,6 +20,7 @@ import w2v
 import pandas as pd
 import util
 from util import *
+from SQL import DB
 from sklearn import cross_validation
 from sklearn.linear_model import LogisticRegression
 import gensim
@@ -43,12 +44,19 @@ class Predictor(object):
         print '=====[ CONSTRUCTING PREDICTOR ]====='
 
         self.data_dir = data_dir
+        self.db = DB()
 
         if not ml_mode:
             print '-----> Loading drugnames'
             self.drug_names = load_drug_names(verbose=False)
             print '-----> Loading drug dataframe'
             self.load_drug_dataframe()
+            print '-----> Loading: drug2vec'
+            self.drug2vec = pickle.load(open(os.path.join(self.data_dir, 'drug2vec.pkl'), 'r'))
+            print '-----> Loading lookup table'
+            self.lookup_table = pickle.load(open('/data/lookup.pkl'))
+            print '-----> Loading classifier'
+            self.load_clf()
 
         else:
             self.load_data()
@@ -71,26 +79,24 @@ class Predictor(object):
 
 
 
-    # def load_clf(self, name='classifier.pkl'):
-    #     """
-    #         loads the classifier 
-    #     """
-    #     print '-----> Loading clf'
-    #     clf_path = os.path.join(self.data_dir, name)
-    #     if os.path.exists(clf_path):
-    #         clf = pkl.load(open(clf_path))
-    #     else:
-    #         clf = None
-    #     return clf
+    def load_clf(self, name='classifier.pkl'):
+        """
+            loads the classifier 
+        """
+        print '-----> Loading clf'
+        clf_path = os.path.join(self.data_dir, name)
+        if os.path.exists(clf_path):
+            self.clf = pickle.load(open(clf_path))
+        else:
+            self.clf = None
 
 
-    # def save_clf(self, name='classifier.pkl'):
-    #     """
-    #         saves the classifier to disk 
-    #     """
-    #     print '-----> Saving clf'
-    #     clf_path = os.path.join(self.data_dir, name)
-    #     pkl.dump(self.clf, open(clf_path, 'w'))
+    def save_clf(self, name='classifier.pkl'):
+        """
+            saves the classifier to disk 
+        """
+        clf_path = os.path.join(self.data_dir, name)
+        pickle.dump(self.clf, open(clf_path, 'w'))
 
 
 
@@ -199,6 +205,18 @@ class Predictor(object):
         print '=====[ GATHER PRODUCTION DATA: COMPLETE ]====='
 
 
+    def train(self):
+        """
+            trains and saves the classifier 
+            (call gather_production_data first)
+        """
+        self.clf = LogisticRegression()
+        print '-----> Training classifier'
+        self.clf.fit(self.X, self.y)
+        print '-----> Saving classifier'
+        self.save_clf()
+
+
     def cross_validate(self):
         """
             trains classifier and cross_validates it 
@@ -214,13 +232,8 @@ class Predictor(object):
 
 
 
-
-
     def cross_validate(self):
         # get X,y dataset
-        X,y = self.train()
-        # randomly permute it
-        X,y = self.shuffle_in_unison(X,y)
         # instantiate the logistic regression
         LR = LogisticRegression()
         # get CV scores
@@ -248,12 +261,34 @@ class Predictor(object):
     ####################[ INTERFACE ]###############################################
     ################################################################################
 
-    def predict(self, data):
+    def predict(self, drugnames):
         """
             returns p(interaction|data) for each possible type 
             of interaction 
         """
-        raise NotImplementedError
+        #=====[ Load classifier if necsesary ]=====
+        if self.clf is None:
+            self.load_clf()
+
+        #=====[ Unpack ]=====
+        s1, s2 = drugnames[0], drugnames[1]
+        d1, d2 = self.db.query(s1), self.db.query(s2)
+        if d1 is None or d2 is None:
+            raise Exception("Something got fucked up: %s or %s not in db" % (s1, s2))
+
+        #=====[ Lookup table ]=====
+        # if tuple(sorted([d1, d2])) in self.lookup_table:
+            # return [{'score':0.69, 'AE':k} for k in self.lookup_table[]]
+
+        #=====[ Predict ]=====
+        features = self.featurize(d1, d2)
+        predictions =   [ 
+                            {'AE':'Interaction', 'score':self.clf.predict_proba(features)[0][1]},
+                            {'AE':'No interaction', 'score':self.clf.predict_proba(features)[0][0]}
+                        ] 
+        return predictions
+
+
 
 
     def get_drugs(self):
@@ -266,7 +301,6 @@ class Predictor(object):
             if type(l) == list:
                 for term in l:
                     conditions.add(term)
-
         return list(conditions)
 
 
