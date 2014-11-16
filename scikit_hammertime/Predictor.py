@@ -53,6 +53,8 @@ class Predictor(object):
             self.load_drug_dataframe()
             print '-----> Loading: drug2vec'
             self.drug2vec = pickle.load(open(os.path.join(self.data_dir, 'drug2vec.pkl'), 'r'))
+            print '-----> Loading lookup table'
+            self.lookup_table = pickle.load(open('/data/lookup.pkl'))
             print '-----> Loading classifier'
             self.load_clf()
 
@@ -274,6 +276,10 @@ class Predictor(object):
         if d1 is None or d2 is None:
             raise Exception("Something got fucked up: %s or %s not in db" % (s1, s2))
 
+        #=====[ Lookup table ]=====
+        # if tuple(sorted([d1, d2])) in self.lookup_table:
+            # return [{'score':0.69 for k in self.lookup_table}]
+
         #=====[ Predict ]=====
         features = self.featurize(d1, d2)
         predictions =   [ 
@@ -295,7 +301,6 @@ class Predictor(object):
             if type(l) == list:
                 for term in l:
                     conditions.add(term)
-
         return list(conditions)
 
 

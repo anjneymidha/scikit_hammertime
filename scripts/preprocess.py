@@ -144,7 +144,7 @@ class Preprocess(object):
 		format_funcs = {
 							'DRUG':self.format_DRUG,
 							'REAC':self.format_REAC,
-							# 'INDI':format_INDI
+							'INDI':self.format_INDI
 						}
 		for filename in [os.path.join(ascii_dir, p) for p in os.listdir(ascii_dir) if p.endswith('.txt')]:
 
