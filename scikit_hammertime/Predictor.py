@@ -51,6 +51,8 @@ class Predictor(object):
             self.drug_names = load_drug_names(verbose=False)
             print '-----> Loading drug dataframe'
             self.load_drug_dataframe()
+            print '-----> Loading: drug2vec'
+            self.drug2vec = pickle.load(open(os.path.join(self.data_dir, 'drug2vec.pkl'), 'r'))
             print '-----> Loading classifier'
             self.load_clf()
 
@@ -82,10 +84,9 @@ class Predictor(object):
         print '-----> Loading clf'
         clf_path = os.path.join(self.data_dir, name)
         if os.path.exists(clf_path):
-            clf = pickle.load(open(clf_path))
+            self.clf = pickle.load(open(clf_path))
         else:
-            clf = None
-        return clf
+            self.clf = None
 
 
     def save_clf(self, name='classifier.pkl'):
@@ -275,7 +276,11 @@ class Predictor(object):
 
         #=====[ Predict ]=====
         features = self.featurize(d1, d2)
-        predictions = [{'AE':'Interaction', 'score':self.clf.predict(features)}] 
+        predictions =   [ 
+                            {'AE':'Interaction', 'score':self.clf.predict_proba(features)[0][0]},
+                            {'AE':'No interaction', 'score':self.clf.predict_proba(features)[0][1]}
+                        ] 
+        return predictions
 
 
 
