@@ -45,7 +45,7 @@ def medlist():
 @app.route("/preexistingconditions")
 def conlist():
 	partialcon = request.args.get('startsWith')
-	matches = app.meditems.values(prefix=partialcon)
+	matches = app.conitems.values(prefix=partialcon)
 	return jsonify(conditions=matches)
 
 #GET /interactions?medicinalproducts=medicinalproduct1,...&conditions=condition1,...
