@@ -277,8 +277,8 @@ class Predictor(object):
             raise Exception("Something got fucked up: %s or %s not in db" % (s1, s2))
 
         #=====[ Lookup table ]=====
-        # if tuple(sorted([d1, d2])) in self.lookup_table:
-            # return [{'score':0.69 for k in self.lookup_table}]
+        if tuple(sorted([d1, d2])) in self.lookup_table:
+            return [{'score':0.69, 'AE':k} for k in self.lookup_table]
 
         #=====[ Predict ]=====
         features = self.featurize(d1, d2)
