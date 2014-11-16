@@ -82,7 +82,10 @@ class Predictor(object):
         """
         if self.data is None:
             self.load_data()
-        raise NotImplementedError
+        # load the trained w2v model
+        d2v = w2v.train()
+        
+
 
 
 
